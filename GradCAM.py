@@ -23,7 +23,6 @@ class GradCAM:
         for layer in reversed(self.model.layers):
             # check to see if the layer has a 4D output
             if len(layer.output_shape) == 4:
-                print(layer.name)
                 return layer.name
         # otherwise, we could not find a 4D layer so the GradCAM
         # algorithm cannot be applied

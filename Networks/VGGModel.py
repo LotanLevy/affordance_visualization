@@ -14,8 +14,7 @@ class VGGModel(NNInterface):
         self.output_path = None
         self.input_size = input_size
         vgg_conv = vgg16.VGG16(weights=None, include_top=False, classes=classes_num, input_shape=(input_size[0], input_size[0], 3))
-        self.first_layer = vgg_conv.layers[0]
-        self.last_conv_layer = vgg_conv.layers[-1]
+
         self.last_layer = tf.keras.layers.Dense(classes_num, activation='softmax')
         vgg_conv.summary()
 
@@ -38,16 +37,49 @@ class VGGModel(NNInterface):
         #     self.load_model(self.get_last_ckpt_path())
         #     print("loads last weights")
 
+    def assign_weights(self, vgg_model):
+        j = 0
+        for i, layer in enumerate(self.__model.layers):
+            if i == 0:
+                for sub_layer in layer.layers[:]:
+                    print("assign {} to {}".format(vgg_model.layers[j].name, sub_layer.name))
+                    vgg_model.layers[j].set_weights(sub_layer.get_weights())
+                    j += 1
+
+                    # model.add(sub_layer)
+                    # # print(sub_layer.name)
+                    # x = sub_layer(x)
+            else:
+                if layer.name.startswith("dropout"):
+                    continue
+                print("assign {} to {}".format(vgg_model.layers[j].name, layer.name))
+
+                vgg_model.layers[j].set_weights(layer.get_weights())
+                j += 1
+
+                # model.add(layer)
+
+
+
     def build_new_model(self):
         inputs = tf.keras.Input(shape=(self.input_size[0], self.input_size[0], 3))
-        x = self.__model.layers[0].input
+        model = tf.keras.Sequential(name="gradCam")
+        # inputs = tf.keras.layers.Input(shape=(self.input_size[0], self.input_size[1], 3))
+        model.add(inputs)
+        # inputs = self.__model.layers[0].layers[0].input
+        # x = inputs
         for i, layer in enumerate(self.__model.layers):
             if i == 0:
                 for sub_layer in layer.layers[1:]:
-                    x = sub_layer(x)
+                    model.add(sub_layer)
+                    # print(sub_layer.name)
+                    # x = sub_layer(x)
             else:
-                x = layer(x)
-        model = tf.keras.Model(inputs=self.__model.layers[0].input, outputs=x)
+                model.add(layer)
+
+                # x = layer(x)
+        # model = tf.keras.Model(inputs=inputs, outputs=x)
+        # model.build(input_shape=(None, self.input_size[0], self.input_size[1], 3) )
         return model
 
 
