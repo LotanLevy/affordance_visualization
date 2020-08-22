@@ -5,12 +5,12 @@ import cv2
 
 
 class GradCAM:
-    def __init__(self, model, classIdx, layerName=None):
+    def __init__(self, model, cls_num, layerName=None):
         # store the model, the class index used to measure the class
         # activation map, and the layer to be used when visualizing
         # the class activation map
         self.model = model
-        self.classIdx = classIdx
+        self.cls_num = cls_num
         self.layerName = layerName
         # if the layer name is None, attempt to automatically find
         # the target output layer
@@ -28,7 +28,7 @@ class GradCAM:
         # algorithm cannot be applied
         raise ValueError("Could not find 4D layer. Cannot apply GradCAM.")
 
-    def compute_heatmap(self, image, eps=1e-8):
+    def compute_heatmap(self, image, class_idx, eps=1e-8):
         # construct our gradient model by supplying (1) the inputs
         # to our pre-trained model, (2) the output of the (presumably)
         # final 4D layer in the network, and (3) the output of the
@@ -48,7 +48,9 @@ class GradCAM:
             tape.watch(inputs)
 
             (convOutputs, predictions) = gradModel(inputs)
-            loss = predictions[:, self.classIdx]
+            onehot = tf.keras.utils.to_categorical(class_idx, num_classes=self.cls_num)
+            loss = tf.keras.losses.CategoricalCrossentropy()(onehot, predictions)
+            # loss = predictions[:, class_idx]
         # use automatic differentiation to compute the gradients
         grads = tape.gradient(loss, convOutputs)
         # compute the guided gradients
@@ -86,6 +88,7 @@ class GradCAM:
         # apply the supplied color map to the heatmap and then
         # overlay the heatmap on the input image
         heatmap = cv2.applyColorMap(heatmap, colormap)
+        print(heatmap.shape)
         output = cv2.addWeighted(image, alpha, heatmap, 1 - alpha, 0)
         # return a 2-tuple of the color mapped heatmap and the output,
         # overlaid image
