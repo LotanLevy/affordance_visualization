@@ -35,7 +35,7 @@ def get_args():
     parser.add_argument("-l", "--label_map", default=None)
 
 
-    parser.add_argument("-t", "--templates_dir", required=True,
+    parser.add_argument("-t", "--templates_dir", default=None,
                         help="path to the templates images")
     return parser.parse_args()
 
@@ -189,9 +189,9 @@ def get_gradCam_image(model, cls_num, image_path, output_path):
 
 def get_results_for_imagesdir(weights_type, input_path, output_path, templates_path):
     ## read templates
-    if weights_type == "DOC":
-        templates_paths = os.listdir(templates_path)
-        templates = np.concatenate([read_image(os.path.join(templates_path, path), args.input_size) for path in templates_paths])
+    # if weights_type == "DOC":
+    #     templates_paths = os.listdir(templates_path)
+    #     templates = np.concatenate([read_image(os.path.join(templates_path, path), args.input_size) for path in templates_paths])
 
 
     dirs = os.listdir(input_path)
