@@ -24,7 +24,7 @@ def image_name(image_path):
 def get_args():
     # construct the argument parser and parse the arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--type', default="VGGModel", choices=["imagenet", "amazon", "DOC"])
+    parser.add_argument('--type', default="VGGModel", choices=["imagenet", "amazon", "doc"])
     parser.add_argument('--cls_num', type=int, default=11)
     parser.add_argument('--input_size', type=int, nargs=2, default=(224, 224))
     parser.add_argument("-i", "--images_dir", required=True,
@@ -189,7 +189,7 @@ def get_gradCam_image(model, cls_num, image_path, output_path):
 
 def get_results_for_imagesdir(weights_type, input_path, output_path, templates_path):
     ## read templates
-    # if weights_type == "DOC":
+    # if weights_type == "doc":
     #     templates_paths = os.listdir(templates_path)
     #     templates = np.concatenate([read_image(os.path.join(templates_path, path), args.input_size) for path in templates_paths])
 
